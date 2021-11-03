@@ -23,12 +23,19 @@ body {
   width: 100%;
   align-items: center;
   justify-content: center;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 #timer {
   position: absolute;
   top: 0;
   left: 0;
+}
+
+#score {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 #playground {
@@ -55,13 +62,28 @@ body {
   z-index: 1;
 }
 
+#arrow {
+  width: max-content;
+  bottom: 0;
+  height: 25px;
+  transform-origin: left;
+  transform: rotate(0deg);
+
+  position: absolute;
+}
+
 .brick {
   width: 50px;
   height: 30px;
-  background-color: greenyellow;
+  background-color: rgb(55, 0, 0);
+  color: white;
   text-align: center;
   border: 0;
   outline: 1px solid black;
 
   position: absolute;
+}
+
+.hidden {
+  display: none;
 }

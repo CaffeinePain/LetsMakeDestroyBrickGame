@@ -1,29 +1,34 @@
 //DOM
+const wrapper = document.querySelector('#wrapper');
 const timer = document.querySelector('#timer');
+const score = document.querySelector('#score');
 const playground = document.querySelector('#playground');
 const ball = document.getElementById('ball');
+const arrow = document.getElementById('arrow');
 
 //setting
 let timerNum = 0;
-let timerDisplayNum = 0;
+let scoreNum = 0;
 
 const ballWidth = 25;
 const ballHeight = 25;
 let ballX = 0;
 let ballY = 25;
-let vx = 0.1;
-let vy = 6;
+let vx = 5;
+let vy = 5;
+let arrowAngle = 0;
+let vd = 1;
 
 const brickWidth = 50;
 const brickHeight = 30;
 
 //function
-function frame() {
+function timerFn() {
     timerNum++;
-    if(timerNum % 60 === 0) {
-        timerDisplayNum += 1;
-    }
-    timer.innerText = `게임 시작 후 ${timerDisplayNum}초`;
+    timer.innerText = `게임 시작 후 ${timerNum}초`
+}
+
+function frame() {
 
     //공 이동부분
     ballMoveHorizon(vx);
@@ -32,11 +37,24 @@ function frame() {
     //공 충돌체크
     bounceWindow();
     bounceBrick();
+    if(ballY <= 25) {
+        window.cancelAnimationFrame(frame);
+        brickLineDown();
+        CreateBrickLine();
+        seizeBall();
+        setArrow();
+        window.requestAnimationFrame(rotateArrow);
+        playground.addEventListener("click", shootBall);
+        arrow.classList.remove("hidden");
+    } else {
+        window.requestAnimationFrame(frame);
+    }
+}
 
-    //공 충돌부분
+function shootBall() {
 
-    //끝
-    window.requestAnimationFrame(frame);
+
+    playground.removeEventListener("click", shootBall);
 }
 
 function ballMoveHorizon(vx) {
@@ -63,69 +81,141 @@ function bounceWindow() {
     if(ballX <= 0 || ballX+25 >= 300) {
         reverseBallVx();
     }
-    if(ballY <= 25 || ballY >= 600) {
+    if(ballY >= 600) {
         reverseBallVy();
     }
 }
 
+function setArrow() {
+    arrow.style.transform = `rotate(0deg)`;
+    arrow.style.left = `${ballX + (ballWidth)/2}px`;
+}
+
+function rotateArrow() {
+    if(vd === -1) {
+        arrowAngle++;
+    } else if(vd === 1) {
+        arrowAngle--;
+    }
+    if(arrowAngle === -180) {
+        vd = -1;
+    } else if(arrowAngle === 0) {
+        vd = 1;
+    }
+arrow.style.transform = `rotate(${arrowAngle}deg)`;
+
+    window.requestAnimationFrame(rotateArrow);
+}
+
+function seizeBall() {
+    vx = 0;
+    vy = 0;
+}
+
 function bounceBrick() {
     bricks = document.querySelectorAll(".brick");
-    bricks.forEach(e => {
+    for(i=0; i<bricks.length; i++) {
+        e = bricks[i];
         const minX = parsePxToInt(e.style.left);
         const minY = parsePxToInt(e.style.top);
         const maxX = minX + brickWidth;
         const maxY = minY + brickHeight;
+        let value = "";
         
         if((minX <= ballX && ballX <= maxX) && (minY <= (600 - ballY) && (600 - ballY) <= maxY)) {
             if(maxX - ballX < maxY - (600 - ballY)) {
-                console.log("Right-Bottom-x");
+                //console.log("Right-Bottom-x");
+                value = "Right-Bottom-x";
                 reverseBallVx();
-                return false;
+                brickNumDown(e);
             }
             if(maxX - ballX > maxY - (600 - ballY)) {
-                console.log("Right-Bottom-y");
+                //console.log("Right-Bottom-y");
+                value = "Right-Bottom-y";
                 reverseBallVy();
-                return false;
+                brickNumDown(e);
             }
         }else if((minX <= ballX + ballWidth && ballX + ballWidth <= maxX) && (minY <= (600 - ballY) && (600 - ballY) <= maxY)) {
             if(maxX - ballX + ballWidth < maxY - (600 - ballY)) {
-                console.log("Left-Bottom-x");
+                //console.log("Left-Bottom-x");
+                value = "Left-Bottom-x";
                 reverseBallVx();
-                return false;
+                brickNumDown(e);
             }
             if(maxX - ballX + ballWidth > maxY - (600 - ballY)) {
-                console.log("Left-Bottom-y");
+                //console.log("Left-Bottom-y");
+                value = "Left-Bottom-y";
                 reverseBallVy();
-                return false;
+                brickNumDown(e);
             }
         } else if((minX <= ballX + ballWidth && ballX + ballWidth <= maxX) && (minY <= (600 - ballY) + ballHeight && (600 - ballY) + ballHeight <= maxY)) {
             if(maxX - ballX + ballWidth < maxY - (600 - ballY)) {
-                console.log("Left-Top-x");
+                //console.log("Left-Top-x");
+                value = "Left-Top-x";
                 reverseBallVx();
-                return false;
+                brickNumDown(e);
             }
             if(maxX - ballX + ballWidth > maxY - (600 - ballY)) {
-                console.log("Left-Top-y");
+                //console.log("Left-Top-y");
+                value = "Left-Top-y";
                 reverseBallVy();
-                return false;
+                brickNumDown(e);
             }
         } else if((minX <= ballX && ballX <= maxX) && (minY <= (600 - ballY) + ballHeight && (600 - ballY) + ballHeight <= maxY)) {
             if(maxX - ballX + ballWidth < maxY - (600 - ballY)) {
-                console.log("Right-Top-y");
+                //console.log("Right-Top-y");
+                value = "Right-Top-y";
                 reverseBallVx();
-                return false;
+                brickNumDown(e);
             }
             if(maxX - ballX + ballWidth > maxY - (600 - ballY)) {
-                console.log("Right-Top-y");
+                //console.log("Right-Top-y");
+                value = "Right-Top-y";
                 reverseBallVy();
-                return false;
+                brickNumDown(e);
             }
         }
-    });
+        if(value !== "") {
+            break;
+        }
+    }
 }
 
-function checkOverlap(i, min, max) {
-    
+function brickNumDown(e) {
+    e.counter--;
+    e.innerText = `${e.counter}`;
+    checkBrickNum(e);
+}
+
+function checkBrickNum(e) {
+    const counter = e.counter;
+    if(counter <= 0) {
+        e.remove();
+        upScore();
+    } else if(counter <= 9) {
+        e.style.backgroundColor = "rgb(255, 182, 193)";
+        e.style.color = "black";
+    } else if(counter <= 19) {
+        e.style.backgroundColor = "rgb(215, 142, 153)";
+        e.style.color = "black";
+    } else if(counter <= 29) {
+        e.style.backgroundColor = "rgb(175, 102, 113)";
+        e.style.color = "black";
+    } else if(counter <= 39) {
+        e.style.backgroundColor = "rgb(135, 62, 73)";
+        e.style.color = "white";
+    } else if(counter <= 49) {
+        e.style.backgroundColor = "rgb(95, 22, 33)";
+        e.style.color = "white";
+    } else {
+        e.style.backgroundColor = "rgb(55, 0, 0)";
+        e.style.color = "white";
+    }
+}
+
+function upScore() {
+    scoreNum += 100;
+    score.innerText = `${scoreNum}점`;
 }
 
 function createNewBrick(x, y) {
@@ -171,5 +261,6 @@ function parseIntToPx(value) {
 }
 
 //start
+setInterval(timerFn, 1000);
 window.requestAnimationFrame(frame);
 CreateBrickLine();
