@@ -1,20 +1,24 @@
 //DOM
 const wrapper = document.querySelector('#wrapper');
 const gameoverScreen = document.querySelector('#gameover-screen');
+const overCounter = document.querySelector('#over-counter');
 const overScore = document.querySelector('#over-score');
 const overTimer = document.querySelector('#over-timer');
+const counter = document.querySelector('#counter');
 const timer = document.querySelector('#timer');
 const score = document.querySelector('#score');
 const info = document.querySelector('#info');
 const playground = document.querySelector('#playground');
-const ball = document.getElementById('ball');
-const arrow = document.getElementById('arrow');
-const arrowLeft = document.getElementById('arrow-point-left');
-const arrowRight = document.getElementById('arrow-point-right');
+const highlighter = document.querySelector('#highlighter');
+const ball = document.querySelector('#ball');
+const arrow = document.querySelector('#arrow');
+const arrowLeft = document.querySelector('#arrow-point-left');
+const arrowRight = document.querySelector('#arrow-point-right');
 
 //setting
 let timerNum = 0;
 let scoreNum = 0;
+let counterNum = 0;
 
 let frameSwitch = false;
 let rotateArrowSwitch = false;
@@ -26,21 +30,32 @@ let ballX = 1;
 let ballY = ballHeight;
 let vx = 5;
 let vy = 5;
+let va = 2; //화살 회전속도
+let vd = -1;
 
 let arrowAngle = 0;
-let vd = 1;
 
 const brickWidth = 50;
 const brickHeight = 30;
 
 //function
+function upCounter() {
+    counterNum++;
+    counter.innerText = `${counterNum}회 |`;
+}
+
+function upScore() {
+    scoreNum += 100;
+    score.innerText = `${scoreNum}점 |`;
+}
+
 function timerFn() {
     timerNum++;
     timer.innerText = `게임 시작 후 ${timerNum}초`;
 }
 
 function displayInfo() {
-    info.innerText = `ballX : ${ballX} / ballY : ${600 - ballY} / ballLeft : ${ball.style.left} / ballTop : ${ball.style.top}`;
+    info.innerText = `ballX : ${ballX.toFixed(3)} / ballY : ${(600 - ballY).toFixed(3)} / ballLeft : ${ball.style.left} / ballTop : ${ball.style.top}`;
 }
 
 function onFrame() {
@@ -76,11 +91,6 @@ function frame() {
         window.requestAnimationFrame(frame);  
     } else if(!frameSwitch) {
         window.cancelAnimationFrame(frame);
-        seizeBall();
-        brickLineDown();
-        CreateBrickLine();
-        setArrow();
-        onRotateArrow();
     }
 }
 
@@ -130,9 +140,15 @@ function bounceWindow() {
         reverseBallVy();
     }
     if(ballY <= ballHeight) {
-        frameSwitch = false;
+        seizeBall();
+        offFrame();
+        upCounter();
         ballY = ballHeight + 1;
-        ball.style.top = "574px";
+        ball.style.top = `${parseIntToPx(600 - ballY)}`;
+        brickLineDown();
+        CreateBrickLine();
+        setArrow();
+        onRotateArrow();
     }
 }
 
@@ -142,17 +158,21 @@ function setArrow() {
     arrow.classList.remove("hidden");
 }
 
+function hideGuidance() {
+    highlighter.classList.add("hidden");
+}
+
 function rotateArrow() {
     //console.log("RotateArrow");
-    if(vd === -1) {
-        arrowAngle++;
-    } else if(vd === 1) {
-        arrowAngle--;
-    }
-    if(arrowAngle === -165) {
-        vd = -1;
-    } else if(arrowAngle === -15) {
+    if(arrowAngle <= -165) {
         vd = 1;
+    } else if(arrowAngle >= -15) {
+        vd = -1;
+    }
+    if(vd === 1) {
+        arrowAngle += va;
+    } else if(vd === -1) {
+        arrowAngle -= va;
     }
     arrow.style.transform = `rotate(${arrowAngle}deg)`;
     if(rotateArrowSwitch) {
@@ -192,11 +212,11 @@ function bounceBrick() {
         
         if((minX <= ballX && ballX <= maxX) && (minY <= (600 - ballY) && (600 - ballY) <= maxY)) {
             if(maxX - ballX < maxY - (600 - ballY)) {
-                //console.log("Right-Bottom-x");
+                console.log("Right-Bottom-x");
                 value = "Right-Bottom-x";
                 reverseBallVx();
                 ballX = maxX + 0.001;
-                console.log(`${ballX}x`);
+                //console.log(`${ballX}x`);
                 ball.style.left = `${ballX}px`;
                 brickNumDown(e);
             }
@@ -204,8 +224,8 @@ function bounceBrick() {
                 //console.log("Right-Bottom-y");
                 value = "Right-Bottom-y";
                 reverseBallVy();
-                ballY = 600 - maxY + 0.001;
-                console.log(`${ballY}y`);
+                ballY = 600 - maxY - 0.001;
+                //console.log(`${ballY}y`);
                 ball.style.top = `${600 - ballY}px`;
                 brickNumDown(e);
             }
@@ -215,7 +235,7 @@ function bounceBrick() {
                 value = "Left-Bottom-x";
                 reverseBallVx();
                 ballX = minX - 0.001 - ballWidth;
-                console.log(`${ballX}x`);
+                //console.log(`${ballX}x`);
                 ball.style.left = `${ballX}px`;
                 brickNumDown(e);
             }
@@ -223,8 +243,8 @@ function bounceBrick() {
                 //console.log("Left-Bottom-y");
                 value = "Left-Bottom-y";
                 reverseBallVy();
-                ballY = 600 - maxY + 0.001;
-                console.log(`${ballY}y`);
+                ballY = 600 - maxY - 0.001;
+                //console.log(`${ballY}y`);
                 ball.style.top = `${600 - ballY}px`;
                 brickNumDown(e);
             }
@@ -234,7 +254,7 @@ function bounceBrick() {
                 value = "Left-Top-x";
                 reverseBallVx();
                 ballX = minX - 0.001 - ballWidth;
-                console.log(`${ballX}x`);
+                //console.log(`${ballX}x`);
                 ball.style.left = `${ballX}px`;
                 brickNumDown(e);
             }
@@ -242,18 +262,18 @@ function bounceBrick() {
                 //console.log("Left-Top-y");
                 value = "Left-Top-y";
                 reverseBallVy();
-                ballY = 600 - minY - 0.001 - ballHeight;
-                console.log(`${ballY}y`);
+                ballY = 600 - minY + 0.001 + ballHeight;
+                //console.log(`${ballY}y`);
                 ball.style.top = `${600 - ballY}px`;
                 brickNumDown(e);
             }
         } else if((minX <= ballX && ballX <= maxX) && (minY <= (600 - ballY) + ballHeight && (600 - ballY) + ballHeight <= maxY)) {
             if(maxX - ballX + ballWidth < maxY - (600 - ballY)) {
-                //console.log("Right-Top-y");
-                value = "Right-Top-y";
+                //console.log("Right-Top-x");
+                value = "Right-Top-x";
                 reverseBallVx();
                 ballX = maxX + 0.001;
-                console.log(`${ballX}x`);
+                //console.log(`${ballX}x`);
                 ball.style.left = `${ballX}px`;
                 brickNumDown(e);
             }
@@ -261,8 +281,8 @@ function bounceBrick() {
                 //console.log("Right-Top-y");
                 value = "Right-Top-y";
                 reverseBallVy();
-                ballY = 600 - maxY - 0.001 - ballHeight;
-                console.log(`${ballY}y`);
+                ballY = 600 - minY + 0.001 + ballHeight;
+                //console.log(`${ballY}y`);
                 ball.style.top = `${600 - ballY}px`;
                 brickNumDown(e);
             }
@@ -284,30 +304,9 @@ function checkBrickNum(e) {
     if(counter <= 0) {
         e.remove();
         upScore();
-    } else if(counter <= 9) {
-        e.style.backgroundColor = "rgb(255, 182, 193)";
-        e.style.color = "black";
-    } else if(counter <= 19) {
-        e.style.backgroundColor = "rgb(215, 142, 153)";
-        e.style.color = "black";
-    } else if(counter <= 29) {
-        e.style.backgroundColor = "rgb(175, 102, 113)";
-        e.style.color = "black";
-    } else if(counter <= 39) {
-        e.style.backgroundColor = "rgb(135, 62, 73)";
-        e.style.color = "white";
-    } else if(counter <= 49) {
-        e.style.backgroundColor = "rgb(95, 22, 33)";
-        e.style.color = "white";
     } else {
-        e.style.backgroundColor = "rgb(55, 0, 0)";
-        e.style.color = "white";
+        setBrickColor(e);
     }
-}
-
-function upScore() {
-    scoreNum += 100;
-    score.innerText = `${scoreNum}점`;
 }
 
 function createNewBrick(x, y) {
@@ -315,11 +314,16 @@ function createNewBrick(x, y) {
     brick.classList.add("brick");
     brick.style.left = `${x}px`;
     brick.style.top = `${y}px`;
-    const randMin = timerNum;
-    const randMax = timerNum + 5;
-    const randNum = Math.floor(Math.random() * (randMax - randMin + 1)) + 1
+    const randMin = (counterNum * 2) + 1;
+    const randMax = (counterNum * 2) + 5;
+    const randNum = Math.floor(Math.random() * (randMax - randMin + 1)) + randMin;
     brick.counter = randNum;
     brick.innerText = brick.counter;
+    setBrickColor(brick);
+    playground.append(brick);
+}
+
+function setBrickColor(brick) {
     if(brick.counter <= 9) {
         brick.style.backgroundColor = "rgb(255, 182, 193)";
         brick.style.color = "black";
@@ -335,11 +339,16 @@ function createNewBrick(x, y) {
     } else if(brick.counter <= 49) {
         brick.style.backgroundColor = "rgb(95, 22, 33)";
         brick.style.color = "white";
-    } else {
+    } else if(brick.counter <= 59) {
         brick.style.backgroundColor = "rgb(55, 0, 0)";
         brick.style.color = "white";
+    } else if(brick.counter <= 69) {
+        brick.style.backgroundColor = "rgb(15, 0, 0)";
+        brick.style.color = "white";
+    } else {
+        brick.style.backgroundColor = "rgb(0, 0, 0)";
+        brick.style.color = "white";
     }
-    playground.append(brick);
 }
 
 function CreateBrickLine() {
@@ -361,7 +370,7 @@ function brickLineDown() {
     });
     bricks.forEach(e => {
         const topValue = parsePxToInt(e.style.top);
-        if(topValue >= 575) {
+        if(topValue >= 600 - brickHeight) {
             gameoverFn();
         }
     })
@@ -370,8 +379,9 @@ function brickLineDown() {
 function gameoverFn() {
     offFrame();
     offRotateArrow();
-    clearInterval(timerFn);
-    clearInterval(displayInfo);
+    clearInterval(timerInterval);
+    clearInterval(infoInterval);
+    overCounter.innerText = `조작 횟수 : ${counterNum}회`
     overScore.innerText = `최종 점수 : ${scoreNum}점`;
     overTimer.innerText = `플레이 시간 : ${timerNum}초`;
     gameoverScreen.style.display = "flex";
@@ -385,10 +395,14 @@ function parseIntToPx(value) {
     return value + "px";
 }
 
+function onDVM() {
+    displayInfo();
+    infoInterval = setInterval(displayInfo, 1);
+}
 //start
 timerFn();
-setInterval(timerFn, 1000);
-displayInfo();
-setInterval(displayInfo, 1);
+let timerInterval = setInterval(timerFn, 1000);
+let infoInterval;
 onRotateArrow();
+highlighter.addEventListener("click", hideGuidance);
 CreateBrickLine();

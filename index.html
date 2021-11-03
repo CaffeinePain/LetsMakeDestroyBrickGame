@@ -10,14 +10,19 @@
 <body>
     <div id="wrapper">
         <div id="gameover-screen" class="hidden">
+            <span id="over-counter">조작 횟수 : NULL회</span>
             <span id="over-score">최종 점수 : NULL점</span>
             <span id="over-timer">플레이 시간 : NULL초</span>
             <button id="restart-btn">다시 시작</button>
         </div>
-        <span id="timer">게임 시작 후 NULL초</span>
-        <span id="score">0점</span>
+        <div id="text-group">
+            <span id="counter">0회 |</span>
+            <span id="score">0점 |</span>
+            <span id="timer">게임 시작 후 NULL초</span>
+        </div>
         <span id="info"></span>
         <div id="playground">
+            <span id="highlighter"><br/><br/><br/><br/><br/>Touch here!</span>
             <div id="arrow" class="hidden">
                 <span id="arrow-point-left" class="arrow-point">&nbsp;</span>
                 <span>　(☞ﾟヮﾟ)☞</span>

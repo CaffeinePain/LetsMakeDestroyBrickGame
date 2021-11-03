@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap");
+
 * {
   user-select: none;
   -ms-user-select: none;
@@ -5,6 +7,7 @@
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  font-family: "Do Hyeon", sans-serif;
 }
 
 html {
@@ -35,18 +38,9 @@ body {
   align-items: center;
   flex-direction: column;
   position: fixed;
-}
-
-#timer {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-#score {
-  position: absolute;
-  top: 0;
-  right: 0;
+  color: #fff;
+  font-size: 40px;
+  z-index: 3;
 }
 
 #info {
@@ -65,6 +59,16 @@ body {
   box-sizing: border-box;
 
   outline: 1px solid black;
+}
+
+#highlighter {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  font-size: 40px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 #ball {
