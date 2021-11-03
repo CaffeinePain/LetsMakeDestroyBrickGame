@@ -15,7 +15,16 @@ const arrow = document.querySelector('#arrow');
 const arrowLeft = document.querySelector('#arrow-point-left');
 const arrowRight = document.querySelector('#arrow-point-right');
 
-//setting
+//user-setting
+const ballSpeed = 5; //공 이동속도
+const arrowSpeed = 2; //화살표 회전속도
+
+//variables
+const ballWidth = 25;
+const ballHeight = 25;
+const brickWidth = 50;
+const brickHeight = 30;
+
 let timerNum = 0;
 let scoreNum = 0;
 let counterNum = 0;
@@ -23,20 +32,13 @@ let counterNum = 0;
 let frameSwitch = false;
 let rotateArrowSwitch = false;
 
-const ballWidth = 25;
-const ballHeight = 25;
-const ballSpeed = 5;
 let ballX = 1;
 let ballY = ballHeight;
-let vx = 5;
-let vy = 5;
-let va = 2; //화살 회전속도
+let vx;
+let vy;
 let vd = -1;
 
 let arrowAngle = 0;
-
-const brickWidth = 50;
-const brickHeight = 30;
 
 //function
 function upCounter() {
@@ -170,9 +172,9 @@ function rotateArrow() {
         vd = -1;
     }
     if(vd === 1) {
-        arrowAngle += va;
+        arrowAngle += arrowSpeed;
     } else if(vd === -1) {
-        arrowAngle -= va;
+        arrowAngle -= arrowSpeed;
     }
     arrow.style.transform = `rotate(${arrowAngle}deg)`;
     if(rotateArrowSwitch) {
