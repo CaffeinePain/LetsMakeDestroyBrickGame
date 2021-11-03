@@ -58,7 +58,7 @@ body {
 
   position: absolute;
   left: 0;
-  top: 575px;
+  top: 574px;
   z-index: 1;
 }
 
@@ -70,6 +70,14 @@ body {
   transform: rotate(0deg);
 
   position: absolute;
+}
+
+#arrow-point-left {
+  background-color: red;
+}
+
+#arrow-point-right {
+  background-color: blue;
 }
 
 .brick {

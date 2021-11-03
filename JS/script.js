@@ -5,10 +5,15 @@ const score = document.querySelector('#score');
 const playground = document.querySelector('#playground');
 const ball = document.getElementById('ball');
 const arrow = document.getElementById('arrow');
+const arrowLeft = document.getElementById('arrow-point-left');
+const arrowRight = document.getElementById('arrow-point-right');
 
 //setting
 let timerNum = 0;
 let scoreNum = 0;
+
+let frameSwitch = false;
+let rotateArrowSwitch = false;
 
 const ballWidth = 25;
 const ballHeight = 25;
@@ -28,8 +33,28 @@ function timerFn() {
     timer.innerText = `게임 시작 후 ${timerNum}초`
 }
 
-function frame() {
+function onFrame() {
+    frameSwitch = true;
+    window.requestAnimationFrame(frame);
+}
 
+function offFrame() {
+    frameSwitch = false;
+}
+
+function onRotateArrow() {
+    setArrow();
+    rotateArrowSwitch = true;
+    window.requestAnimationFrame(rotateArrow);
+    playground.addEventListener("click", shootBall);
+}
+
+function offRotateArrow() {
+    rotateArrowSwitch = false;
+}
+
+function frame() {
+    //console.log("Frame");
     //공 이동부분
     ballMoveHorizon(vx);
     ballMoveVertical(vy);
@@ -37,24 +62,57 @@ function frame() {
     //공 충돌체크
     bounceWindow();
     bounceBrick();
-    if(ballY <= 25) {
+    if(frameSwitch) {
+        window.requestAnimationFrame(frame);  
+    } else if(!frameSwitch) {
         window.cancelAnimationFrame(frame);
+        seizeBall();
         brickLineDown();
         CreateBrickLine();
-        seizeBall();
         setArrow();
-        window.requestAnimationFrame(rotateArrow);
-        playground.addEventListener("click", shootBall);
-        arrow.classList.remove("hidden");
-    } else {
-        window.requestAnimationFrame(frame);
+        onRotateArrow();
     }
 }
 
 function shootBall() {
-
-
+    rotateArrowSwitch = false;
+    deg = Math.abs(parseInt(((arrow.style.transform).replace("rotate(", "")).replace("deg)", "")));
+    /* if(deg < 90) {
+        const tan = Math.tan(deg);
+        vx = 3;
+        vy = Math.abs(vx * tan);
+        if(vy >= 9) {
+            vx = (vx/vy)*3;
+            vy = 3;
+        }
+        console.log(vx, vy);
+    } else if(deg > 90) {
+        const tan = Math.tan(180 - deg);
+        vx = -3;
+        vy = Math.abs(vx * tan) + 3;
+        if(vy >= 9) {
+            vx = (vx/vy)*3;
+            vy = 3;
+        }
+        console.log(vx, vy);
+    } else if(deg === 90) {
+        vx = 0;
+        vy = 3;
+        console.log(vx, vy);
+    } */
+    const tan = getArrowTan();
+    if(tan > 1) {
+        vx = 3 / tan;
+        vy = 3;
+    } else if(tan <= 1) {
+        vx = 3;
+        vy = vx * tan;
+    }
+    if(deg > 90) {
+        vx = -vx;
+    }
     playground.removeEventListener("click", shootBall);
+    onFrame();
 }
 
 function ballMoveHorizon(vx) {
@@ -84,27 +142,50 @@ function bounceWindow() {
     if(ballY >= 600) {
         reverseBallVy();
     }
+    if(ballY <= 25) {
+        frameSwitch = false;
+        ballY = 26;
+        ball.style.top = "574px";
+    }
 }
 
 function setArrow() {
     arrow.style.transform = `rotate(0deg)`;
     arrow.style.left = `${ballX + (ballWidth)/2}px`;
+    arrow.classList.remove("hidden");
 }
 
 function rotateArrow() {
+    //console.log("RotateArrow");
     if(vd === -1) {
         arrowAngle++;
     } else if(vd === 1) {
         arrowAngle--;
     }
-    if(arrowAngle === -180) {
+    if(arrowAngle === -165) {
         vd = -1;
-    } else if(arrowAngle === 0) {
+    } else if(arrowAngle === -15) {
         vd = 1;
     }
-arrow.style.transform = `rotate(${arrowAngle}deg)`;
+    arrow.style.transform = `rotate(${arrowAngle}deg)`;
+    if(rotateArrowSwitch) {
+        window.requestAnimationFrame(rotateArrow);
+    } else if(!rotateArrowSwitch) {
+        arrow.classList.add("hidden");
+        window.cancelAnimationFrame(rotateArrow);
+    }
+}
 
-    window.requestAnimationFrame(rotateArrow);
+function getArrowTan() {
+    const Left = arrowLeft.getBoundingClientRect();
+    const Right = arrowRight.getBoundingClientRect();
+    const LeftX = Left.left;
+    const LeftY = Left.top;
+    const RightX = Right.left;
+    const RightY = Right.top;
+    const hValue = Math.abs(RightX - LeftX);
+    const vValue = Math.abs(RightY - LeftY);
+    return Math.round(vValue / hValue);
 }
 
 function seizeBall() {
@@ -262,5 +343,5 @@ function parseIntToPx(value) {
 
 //start
 setInterval(timerFn, 1000);
-window.requestAnimationFrame(frame);
+onRotateArrow();
 CreateBrickLine();
