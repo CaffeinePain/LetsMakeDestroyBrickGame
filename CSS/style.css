@@ -26,6 +26,17 @@ body {
   background-color: rgba(0, 0, 0, 0);
 }
 
+#gameover-screen {
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: fixed;
+}
+
 #timer {
   position: absolute;
   top: 0;
@@ -36,6 +47,12 @@ body {
   position: absolute;
   top: 0;
   right: 0;
+}
+
+#info {
+  position: absolute;
+  bottom: 0;
+  left: 45%;
 }
 
 #playground {
@@ -57,9 +74,8 @@ body {
   background-color: peru;
 
   position: absolute;
-  left: 0;
+  left: 1px;
   top: 574px;
-  z-index: 1;
 }
 
 #arrow {
@@ -72,13 +88,13 @@ body {
   position: absolute;
 }
 
-#arrow-point-left {
+/* #arrow-point-left {
   background-color: red;
 }
 
 #arrow-point-right {
   background-color: blue;
-}
+} */
 
 .brick {
   width: 50px;

@@ -9,8 +9,14 @@
 </head>
 <body>
     <div id="wrapper">
-        <span id="timer">게임 시작 후 0초</span>
+        <div id="gameover-screen" class="hidden">
+            <span id="over-score">최종 점수 : NULL점</span>
+            <span id="over-timer">플레이 시간 : NULL초</span>
+            <button id="restart-btn">다시 시작</button>
+        </div>
+        <span id="timer">게임 시작 후 NULL초</span>
         <span id="score">0점</span>
+        <span id="info"></span>
         <div id="playground">
             <div id="arrow" class="hidden">
                 <span id="arrow-point-left" class="arrow-point">&nbsp;</span>
