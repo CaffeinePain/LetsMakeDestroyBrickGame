@@ -4,6 +4,7 @@ const gameoverScreen = document.querySelector('#gameover-screen');
 const overCounter = document.querySelector('#over-counter');
 const overScore = document.querySelector('#over-score');
 const overTimer = document.querySelector('#over-timer');
+const restartBtn = document.querySelector('#restart-btn');
 const counter = document.querySelector('#counter');
 const timer = document.querySelector('#timer');
 const score = document.querySelector('#score');
@@ -19,15 +20,18 @@ const arrowRight = document.querySelector('#arrow-point-right');
 const ballSpeed = 5; //공 이동속도
 const arrowSpeed = 2; //화살표 회전속도
 
-//variables
+//variables-constant
 const ballWidth = 25;
 const ballHeight = 25;
 const brickWidth = 50;
 const brickHeight = 30;
 
+//variables-vary-in-script
 let timerNum = 0;
 let scoreNum = 0;
 let counterNum = 0;
+let timerInterval;
+let infoInterval;
 
 let frameSwitch = false;
 let rotateArrowSwitch = false;
@@ -40,13 +44,15 @@ let vd = -1;
 
 let arrowAngle = 0;
 
+let item1 = 0;
+
 //function
-function upCounter() {
+function countFn() {
     counterNum++;
     counter.innerText = `${counterNum}회 |`;
 }
 
-function upScore() {
+function scoreFn() {
     scoreNum += 100;
     score.innerText = `${scoreNum}점 |`;
 }
@@ -144,7 +150,7 @@ function bounceWindow() {
     if(ballY <= ballHeight) {
         seizeBall();
         offFrame();
-        upCounter();
+        countFn();
         ballY = ballHeight + 1;
         ball.style.top = `${parseIntToPx(600 - ballY)}`;
         brickLineDown();
@@ -211,82 +217,98 @@ function bounceBrick() {
         const maxX = minX + brickWidth;
         const maxY = minY + brickHeight;
         let value = "";
-        
         if((minX <= ballX && ballX <= maxX) && (minY <= (600 - ballY) && (600 - ballY) <= maxY)) {
             if(maxX - ballX < maxY - (600 - ballY)) {
-                console.log("Right-Bottom-x");
-                value = "Right-Bottom-x";
                 reverseBallVx();
-                ballX = maxX + 0.001;
-                //console.log(`${ballX}x`);
-                ball.style.left = `${ballX}px`;
                 brickNumDown(e);
-            }
-            if(maxX - ballX > maxY - (600 - ballY)) {
-                //console.log("Right-Bottom-y");
-                value = "Right-Bottom-y";
+            } else if(maxX - ballX > maxY - (600 - ballY)) {
                 reverseBallVy();
-                ballY = 600 - maxY - 0.001;
-                //console.log(`${ballY}y`);
-                ball.style.top = `${600 - ballY}px`;
                 brickNumDown(e);
             }
-        }else if((minX <= ballX + ballWidth && ballX + ballWidth <= maxX) && (minY <= (600 - ballY) && (600 - ballY) <= maxY)) {
-            if(maxX - ballX + ballWidth < maxY - (600 - ballY)) {
-                //console.log("Left-Bottom-x");
-                value = "Left-Bottom-x";
+        } else if((minX <= ballX + ballWidth && ballX + ballWidth <= maxX) && (minY <= (600 - ballY) && (600 - ballY) <= maxY)) {
+            if(maxX - ballX < maxY - (600 - ballY)) {
                 reverseBallVx();
-                ballX = minX - 0.001 - ballWidth;
-                //console.log(`${ballX}x`);
-                ball.style.left = `${ballX}px`;
                 brickNumDown(e);
-            }
-            if(maxX - ballX + ballWidth > maxY - (600 - ballY)) {
-                //console.log("Left-Bottom-y");
-                value = "Left-Bottom-y";
+            } else if(maxX - ballX > maxY - (600 - ballY)) {
                 reverseBallVy();
-                ballY = 600 - maxY - 0.001;
-                //console.log(`${ballY}y`);
-                ball.style.top = `${600 - ballY}px`;
                 brickNumDown(e);
             }
         } else if((minX <= ballX + ballWidth && ballX + ballWidth <= maxX) && (minY <= (600 - ballY) + ballHeight && (600 - ballY) + ballHeight <= maxY)) {
             if(maxX - ballX + ballWidth < maxY - (600 - ballY)) {
-                //console.log("Left-Top-x");
-                value = "Left-Top-x";
                 reverseBallVx();
-                ballX = minX - 0.001 - ballWidth;
-                //console.log(`${ballX}x`);
-                ball.style.left = `${ballX}px`;
                 brickNumDown(e);
-            }
-            if(maxX - ballX + ballWidth > maxY - (600 - ballY)) {
-                //console.log("Left-Top-y");
-                value = "Left-Top-y";
+            } else if(maxX - ballX + ballWidth > maxY - (600 - ballY)) {
                 reverseBallVy();
-                ballY = 600 - minY + 0.001 + ballHeight;
-                //console.log(`${ballY}y`);
-                ball.style.top = `${600 - ballY}px`;
                 brickNumDown(e);
             }
-        } else if((minX <= ballX && ballX <= maxX) && (minY <= (600 - ballY) + ballHeight && (600 - ballY) + ballHeight <= maxY)) {
+        } else if((minX+10 <= ballX && ballX <= maxX-10) && (minY+5 <= (600 - ballY) + ballHeight && (600 - ballY) + ballHeight <= maxY-5)) {
             if(maxX - ballX + ballWidth < maxY - (600 - ballY)) {
-                //console.log("Right-Top-x");
-                value = "Right-Top-x";
                 reverseBallVx();
+                brickNumDown(e);
+            } else if(maxX - ballX + ballWidth > maxY - (600 - ballY)) {
+                reverseBallVy();
+                brickNumDown(e);
+            }
+        }
+        if((minX+10 <= ballX && ballX <= maxX-10) && (minY+5 <= (600 - ballY) && (600 - ballY) <= maxY-5)) {
+            if(maxX - ballX < maxY - (600 - ballY)) {
+                //console.log("Right-Bottom-x");
+                //value = "Right-Bottom-x";
                 ballX = maxX + 0.001;
                 //console.log(`${ballX}x`);
                 ball.style.left = `${ballX}px`;
-                brickNumDown(e);
+            }
+            if(maxX - ballX > maxY - (600 - ballY)) {
+                //console.log("Right-Bottom-y");
+                //value = "Right-Bottom-y";
+                ballY = 600 - maxY - 0.001;
+                //console.log(`${ballY}y`);
+                ball.style.top = `${600 - ballY}px`;
+            }
+        }else if((minX+10 <= ballX + ballWidth && ballX + ballWidth <= maxX-10) && (minY+5 <= (600 - ballY) && (600 - ballY) <= maxY-5)) {
+            if(maxX - ballX + ballWidth < maxY - (600 - ballY)) {
+                //console.log("Left-Bottom-x");
+                //value = "Left-Bottom-x";
+                ballX = minX - 0.001 - ballWidth;
+                //console.log(`${ballX}x`);
+                ball.style.left = `${ballX}px`;
             }
             if(maxX - ballX + ballWidth > maxY - (600 - ballY)) {
-                //console.log("Right-Top-y");
-                value = "Right-Top-y";
-                reverseBallVy();
+                //console.log("Left-Bottom-y");
+                //value = "Left-Bottom-y";
+                ballY = 600 - maxY - 0.001;
+                //console.log(`${ballY}y`);
+                ball.style.top = `${600 - ballY}px`;
+            }
+        } else if((minX+10 <= ballX + ballWidth && ballX + ballWidth <= maxX-10) && (minY+5 <= (600 - ballY) + ballHeight && (600 - ballY) + ballHeight <= maxY-5)) {
+            if(maxX - ballX + ballWidth < maxY - (600 - ballY)) {
+                //console.log("Left-Top-x");
+                //value = "Left-Top-x";
+                ballX = minX - 0.001 - ballWidth;
+                //console.log(`${ballX}x`);
+                ball.style.left = `${ballX}px`;
+            }
+            if(maxX - ballX + ballWidth > maxY - (600 - ballY)) {
+                //console.log("Left-Top-y");
+                //value = "Left-Top-y";
                 ballY = 600 - minY + 0.001 + ballHeight;
                 //console.log(`${ballY}y`);
                 ball.style.top = `${600 - ballY}px`;
-                brickNumDown(e);
+            }
+        } else if((minX+10 <= ballX && ballX <= maxX-10) && (minY+5 <= (600 - ballY) + ballHeight && (600 - ballY) + ballHeight <= maxY-5)) {
+            if(maxX - ballX + ballWidth < maxY - (600 - ballY)) {
+                //console.log("Right-Top-x");
+                //value = "Right-Top-x";
+                ballX = maxX + 0.001;
+                //console.log(`${ballX}x`);
+                ball.style.left = `${ballX}px`;
+            }
+            if(maxX - ballX + ballWidth > maxY - (600 - ballY)) {
+                //console.log("Right-Top-y");
+                //value = "Right-Top-y";
+                ballY = 600 - minY + 0.001 + ballHeight;
+                //console.log(`${ballY}y`);
+                ball.style.top = `${600 - ballY}px`;
             }
         }
         if(value !== "") {
@@ -305,7 +327,7 @@ function checkBrickNum(e) {
     const counter = e.counter;
     if(counter <= 0) {
         e.remove();
-        upScore();
+        scoreFn();
     } else {
         setBrickColor(e);
     }
@@ -322,6 +344,9 @@ function createNewBrick(x, y) {
     brick.counter = randNum;
     brick.innerText = brick.counter;
     setBrickColor(brick);
+    if((counterNum !== 0) && (counterNum % 5 === 0)) {
+        brick.classList.add("item-addBall");
+    }
     playground.append(brick);
 }
 
@@ -401,10 +426,31 @@ function onDVM() {
     displayInfo();
     infoInterval = setInterval(displayInfo, 1);
 }
+
+function restartGame() {
+    const brick = document.querySelectorAll('.brick');
+    brick.forEach(e =>{
+        e.remove();
+    });
+    counterNum = 0;
+    counter.innerText = `${counterNum}회 |`;
+    scoreNum = 0;
+    score.innerText = `${scoreNum}점 |`;
+    timerNum = 0;
+    timer.innerText = `게임 시작 후 ${timerNum}초`;
+    gameoverScreen.style.display = "none";
+    startGame();
+} 
+
+function startGame() {
+    timerInterval = setInterval(timerFn, 1000);
+    onRotateArrow();
+    highlighter.addEventListener("click", hideGuidance);
+    CreateBrickLine();
+}
+
 //start
 timerFn();
-let timerInterval = setInterval(timerFn, 1000);
-let infoInterval;
-onRotateArrow();
-highlighter.addEventListener("click", hideGuidance);
-CreateBrickLine();
+startGame();
+
+restartBtn.addEventListener("click", restartGame);
