@@ -11,7 +11,6 @@ const score = document.querySelector('#score');
 const info = document.querySelector('#info');
 const playground = document.querySelector('#playground');
 const highlighter = document.querySelector('#highlighter');
-const ball = document.querySelector('#ball');
 const arrow = document.querySelector('#arrow');
 const arrowLeft = document.querySelector('#arrow-point-left');
 const arrowRight = document.querySelector('#arrow-point-right');
@@ -20,9 +19,10 @@ const arrowRight = document.querySelector('#arrow-point-right');
 const ballSpeed = 5; //공 이동속도
 const arrowSpeed = 2; //화살표 회전속도
 
+const DefaultBallWidth = 25;
+const DefaultBallHeight = 25;
+
 //variables-constant
-const ballWidth = 25;
-const ballHeight = 25;
 const brickWidth = 50;
 const brickHeight = 30;
 
@@ -36,58 +36,103 @@ let infoInterval;
 let frameSwitch = false;
 let rotateArrowSwitch = false;
 
-let ballX = 1;
-let ballY = ballHeight;
-let vx;
-let vy;
 let vd = -1;
 
 let arrowAngle = 0;
 
 let item1 = 0;
 
+//수정중
+let nowBallsX = 0;
+let nowBallsY = 0;
+let balls = [];
+let ball1 = {
+    target: "ball1",
+    width: 25,
+    height: 25,
+    x: 0,
+    y: 0,
+    vx: 0,
+    vy: 0,
+};
+
+let obstacles = [
+    [0, 300, 0, 300],
+];
+
 //function
-function countFn() {
+function addNewBall() { //done
+    const ball = {
+        target: `ball${balls.length}`,
+        width: DefaultBallWidth,
+        height: DefaultBallHeight,
+        x: nowBallsX,
+        y: nowBallsY,
+        vx: 0,
+        vy: 0,
+    };
+    balls.push(ball);
+}
+
+function drawAllBalls() { //done
+    for(i=0; i<balls.length; i++) {
+        const ball = document.createElement("span");
+        const ballObj = balls[i];
+        ball.classList.add(".ball");
+        ball.id = `${ballObj.target}`;
+
+        ball.style.left = ballObj.x;
+        ball.style.top = ballObj.y;
+
+        playground.prepend(ball);
+    }
+}
+
+function countFn() { //done
     counterNum++;
     counter.innerText = `${counterNum}회 |`;
 }
 
-function scoreFn() {
+function scoreFn() { //done
     scoreNum += 100;
     score.innerText = `${scoreNum}점 |`;
 }
 
-function timerFn() {
+function timerFn() { //dome
     timerNum++;
     timer.innerText = `게임 시작 후 ${timerNum}초`;
 }
 
-function displayInfo() {
-    info.innerText = `ballX : ${ballX.toFixed(3)} / ballY : ${(600 - ballY).toFixed(3)} / ballLeft : ${ball.style.left} / ballTop : ${ball.style.top}`;
+function displayInfo() { //done
+    for(i=0; i<balls.length; i++) {
+        const ballObj = balls[i];
+        const span = document.createElement("span");
+        span.innerText = `${ballObj.target} | x:${ballObj.x}, y:${ballObj.y}, vx:${ballList.vx}, vy:${ballObj.vy}`
+        info.prepend(span);
+    }
 }
 
-function onFrame() {
+function onFrame() { //done
     frameSwitch = true;
     window.requestAnimationFrame(frame);
 }
 
-function offFrame() {
+function offFrame() { //done
     frameSwitch = false;
 }
 
-function onRotateArrow() {
+function onRotateArrow() { //done
     setArrow();
     rotateArrowSwitch = true;
     window.requestAnimationFrame(rotateArrow);
     playground.addEventListener("click", shootBall);
 }
 
-function offRotateArrow() {
+function offRotateArrow() { //done
     rotateArrowSwitch = false;
 }
 
 function frame() {
-    //console.log("Frame");
     //공 이동부분
     ballMoveHorizon(vx);
     ballMoveVertical(vy);
@@ -102,32 +147,40 @@ function frame() {
     }
 }
 
-function shootBall() {
-    rotateArrowSwitch = false;
+function shootBall(ballObj) {
+    offRotateArrow();
     deg = Math.abs(parseInt(((arrow.style.transform).replace("rotate(", "")).replace("deg)", "")));
     const tan = getArrowTan();
     if(tan > 1) {
-        vx = ballSpeed / tan;
-        vy = ballSpeed;
+        ballObj.vx = ballSpeed / tan;
+        ballObj.vy = ballSpeed;
     } else if(tan <= 1) {
-        vx = ballSpeed;
-        vy = vx * tan;
+        ballObj.vx = ballSpeed;
+        ballObj.vy = ballObj.vx * tan;
     }
     if(deg > 90) {
-        vx = -vx;
+        ballObj.vx = -ballObj.vx;
     }
     playground.removeEventListener("click", shootBall);
     onFrame();
 }
 
-function ballMoveHorizon(vx) {
-    ballX += vx;
-    ball.style.left = `${ballX}px`;
+function moveAllBallHor() {
+    for(i=0; i<balls.length; i++) {
+        const ball = balls[i];
+        const ballSpan = document.getElementById(`${ball.target}`);
+        ball.x += ball.vx;
+        ballSpan.style.left = ball.x;
+    }
 }
 
-function ballMoveVertical(vy) {
-    ballY += vy;
-    ball.style.top = `${600 - ballY}px`;
+function moveAllBallVer() {
+    for(i=0; i<balls.length; i++) {
+        const ball = balls[i];
+        const ballSpan = document.getElementById(`${ball.target}`);
+        ball.y -= ball.vy;
+        ballSpan.style.top = ball.y;
+    }
 }
 
 function reverseBallVx() {
@@ -160,9 +213,10 @@ function bounceWindow() {
     }
 }
 
-function setArrow() {
+function setArrow() { //done
+    const ballObj = balls[0];
     arrow.style.transform = `rotate(-15deg)`;
-    arrow.style.left = `${ballX + (ballWidth)/2}px`;
+    arrow.style.left = `${ballObj.x + (ballObj.width)/2}px`;
     arrow.classList.remove("hidden");
 }
 
@@ -447,6 +501,10 @@ function startGame() {
     onRotateArrow();
     highlighter.addEventListener("click", hideGuidance);
     CreateBrickLine();
+}
+
+function checkBallCollide(ballObj) {
+    
 }
 
 //start
